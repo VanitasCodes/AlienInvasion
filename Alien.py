@@ -1,26 +1,42 @@
-import pygame
+# Alien.py
+"""Alien class for enemy sprites."""
 
+import pygame
 from pygame.sprite import Sprite
 
+
 class Alien(Sprite):
-    """A Class To Represent A Single Alien in The Fleet"""
-    def __init__(self, AI_Game):
+    """A class to represent a single alien in the fleet."""
+
+    def __init__(self, ai_game):
+        """Initialize the alien and set its starting position."""
         super().__init__()
-        self.screen = AI_Game.screen
-        self.Settings = AI_Game.Settings
-        #Load The Alien Image And Set Its Rect Attribute
-        self.image = pygame.image.load('Images/Alien.bmp')
+        self.screen = ai_game.screen
+        self.settings = ai_game.settings
+
+        # Load the alien image and set its rect attribute
+        try:
+            self.image = pygame.image.load('Images/Alien.bmp')
+        except pygame.error:
+            # Create a simple alien shape if image not found
+            self.image = pygame.Surface((50, 40))
+            self.image.fill((0, 255, 0))
+        
         self.rect = self.image.get_rect()
-        #Start Each New Alien Near The Top Left of The Screen
+
+        # Start each new alien near the top left of the screen
         self.rect.x = self.rect.width
         self.rect.y = self.rect.height
-        #Store The Alien's Exact Horizontal Position
+
+        # Store the alien's exact horizontal position
         self.x = float(self.rect.x)
+
     def check_edges(self):
-        """Return True If Alien is At The Edge of The Screen"""
+        """Return True if alien is at edge of screen."""
         screen_rect = self.screen.get_rect()
         return (self.rect.right >= screen_rect.right) or (self.rect.left <= 0)
+
     def update(self):
-        """Move The Alien To The Left or The Right"""
-        self.x += self.Settings.alien_speed * self.Settings.fleet_direction
+        """Move the alien right or left."""
+        self.x += self.settings.alien_speed * self.settings.fleet_direction
         self.rect.x = self.x
