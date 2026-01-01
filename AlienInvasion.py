@@ -9,6 +9,7 @@ import pygame
 from Settings import Settings
 from GameStats import GameStats
 from Scoreboard import Scoreboard
+from SoundManager import SoundManager
 from Button import Button
 from Ship import Ship
 from Bullet import Bullet
@@ -29,6 +30,9 @@ class AlienInvasion:
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
+
+        # Initialize sound manager
+        self.sound = SoundManager()
 
         # Create an instance to store game statistics and create a scoreboard
         self.stats = GameStats(self)
@@ -111,6 +115,8 @@ class AlienInvasion:
             self._fire_bullet()
         elif event.key == pygame.K_p:
             self._toggle_pause()
+        elif event.key == pygame.K_m:
+            self._toggle_mute()
         elif event.key == pygame.K_ESCAPE:
             self._save_high_score()
             sys.exit()
@@ -127,11 +133,19 @@ class AlienInvasion:
         if self.stats.game_active:
             self.game_paused = not self.game_paused
 
+    def _toggle_mute(self):
+        """Toggle sound mute."""
+        if self.sound.volume > 0:
+            self.sound.mute()
+        else:
+            self.sound.unmute()
+
     def _fire_bullet(self):
         """Create a new bullet and add it to the bullets group."""
         if len(self.bullets) < self.settings.bullets_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
+            self.sound.play('shoot')
 
     def _update_bullets(self):
         """Update position of bullets and get rid of old bullets."""
@@ -156,6 +170,7 @@ class AlienInvasion:
                 self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
             self.sb.check_high_score()
+            self.sound.play('explosion')
 
         if not self.aliens:
             # Destroy existing bullets and create new fleet
@@ -166,6 +181,7 @@ class AlienInvasion:
             # Increase level
             self.stats.level += 1
             self.sb.prep_level()
+            self.sound.play('levelup')
 
     def _update_aliens(self):
         """Check if the fleet is at an edge, then update positions."""
@@ -202,11 +218,14 @@ class AlienInvasion:
             self._create_fleet()
             self.ship.center_ship()
 
+            self.sound.play('explosion')
+
             # Pause
             sleep(0.5)
         else:
             self.stats.game_active = False
             pygame.mouse.set_visible(True)
+            self.sound.play('gameover')
 
     def _create_fleet(self):
         """Create the fleet of aliens."""
